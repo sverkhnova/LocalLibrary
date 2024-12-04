@@ -1,5 +1,11 @@
 var createError = require('http-errors');
 var express = require('express');
+var mongoose = require("mongoose");
+var mongoDB = "mongodb+srv://sverkhnova:rfpbyfrb041@cluster0.rdfhh.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"; //замените url!!!
+mongoose.connect(mongoDB);
+mongoose.Promise = global.Promise;
+var db = mongoose.connection;
+db.on("error", console.error.bind(console, "MongoDB connection error:"));
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
