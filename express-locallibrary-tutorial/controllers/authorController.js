@@ -1,41 +1,42 @@
-var Author = require("../models/author");
+const Author = require("../models/author");
+const asyncHandler = require("express-async-handler");
 
-// Показать список всех авторов.
-exports.author_list = function (req, res) {
+// Display list of all Authors.
+exports.author_list = asyncHandler(async (req, res, next) => {
   res.send("NOT IMPLEMENTED: Author list");
-};
+});
 
-// Показать подробную страницу для данного автора.
-exports.author_detail = function (req, res) {
-  res.send("NOT IMPLEMENTED: Author detail: " + req.params.id);
-};
+// Display detail page for a specific Author.
+exports.author_detail = asyncHandler(async (req, res, next) => {
+  res.send(`NOT IMPLEMENTED: Author detail: ${req.params.id}`);
+});
 
-// Показать форму создания автора по запросу GET.
-exports.author_create_get = function (req, res) {
+// Display Author create form on GET.
+exports.author_create_get = asyncHandler(async (req, res, next) => {
   res.send("NOT IMPLEMENTED: Author create GET");
-};
+});
 
-// Создать автора по запросу POST.
-exports.author_create_post = function (req, res) {
+// Handle Author create on POST.
+exports.author_create_post = asyncHandler(async (req, res, next) => {
   res.send("NOT IMPLEMENTED: Author create POST");
-};
+});
 
-// Показать форму удаления автора по запросу GET.
-exports.author_delete_get = function (req, res) {
+// Display Author delete form on GET.
+exports.author_delete_get = asyncHandler(async (req, res, next) => {
   res.send("NOT IMPLEMENTED: Author delete GET");
-};
+});
 
-// Удалить автора по запросу POST.
-exports.author_delete_post = function (req, res) {
+// Handle Author delete on POST.
+exports.author_delete_post = asyncHandler(async (req, res, next) => {
   res.send("NOT IMPLEMENTED: Author delete POST");
-};
+});
 
-// Показать форму обновления автора по запросу GET.
-exports.author_update_get = function (req, res) {
+// Display Author update form on GET.
+exports.author_update_get = asyncHandler(async (req, res, next) => {
   res.send("NOT IMPLEMENTED: Author update GET");
-};
+});
 
-// Обновить автора по запросу POST.
-exports.author_update_post = function (req, res) {
+// Handle Author update on POST.
+exports.author_update_post = asyncHandler(async (req, res, next) => {
   res.send("NOT IMPLEMENTED: Author update POST");
-};
+});

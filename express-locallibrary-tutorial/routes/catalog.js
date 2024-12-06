@@ -1,19 +1,18 @@
-var express = require("express");
-var router = express.Router();
+const express = require("express");
+const router = express.Router();
 
-// Требующиеся модули контроллеров.
-var book_controller = require("../controllers/bookController");
-var author_controller = require("../controllers/authorController");
-var genre_controller = require("../controllers/genreController");
-var book_instance_controller = require("../controllers/bookinstanceController");
+// Require controller modules.
+const book_controller = require("../controllers/bookController");
+const author_controller = require("../controllers/authorController");
+const genre_controller = require("../controllers/genreController");
+const book_instance_controller = require("../controllers/bookinstanceController");
 
-/// BOOK ROUTES МАРШРУТЫ КНИГ///
+/// BOOK ROUTES ///
 
 // GET catalog home page.
 router.get("/", book_controller.index);
 
 // GET request for creating a Book. NOTE This must come before routes that display Book (uses id).
-// GET запрос для создания книги. Должен появиться до маршрута, показывающего книгу(использует id)
 router.get("/book/create", book_controller.book_create_get);
 
 // POST request for creating Book.
@@ -40,7 +39,6 @@ router.get("/books", book_controller.book_list);
 /// AUTHOR ROUTES ///
 
 // GET request for creating Author. NOTE This must come before route for id (i.e. display author).
-// GET-запрос для создания автора. Должен появиться до маршрута для id (для вывода автора)
 router.get("/author/create", author_controller.author_create_get);
 
 // POST request for creating Author.
@@ -67,7 +65,6 @@ router.get("/authors", author_controller.author_list);
 /// GENRE ROUTES ///
 
 // GET request for creating a Genre. NOTE This must come before route that displays Genre (uses id).
-// GET-запрос для создания жанра. Должен появиться до маршрута, выводящего жанр (( с использованием id)
 router.get("/genre/create", genre_controller.genre_create_get);
 
 //POST request for creating Genre.
@@ -94,7 +91,6 @@ router.get("/genres", genre_controller.genre_list);
 /// BOOKINSTANCE ROUTES ///
 
 // GET request for creating a BookInstance. NOTE This must come before route that displays BookInstance (uses id).
-// GET-запрос для создания экземпляра книги. Должен появиться до маршрута, выводящего BookInstance с использованием id
 router.get(
   "/bookinstance/create",
   book_instance_controller.bookinstance_create_get,

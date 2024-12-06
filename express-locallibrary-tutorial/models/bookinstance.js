@@ -1,9 +1,9 @@
-var mongoose = require("mongoose");
+const mongoose = require("mongoose");
 
-var Schema = mongoose.Schema;
+const Schema = mongoose.Schema;
 
-var BookInstanceSchema = new Schema({
-  book: { type: Schema.ObjectId, ref: "Book", required: true }, //ссылка на книгу
+const BookInstanceSchema = new Schema({
+  book: { type: Schema.Types.ObjectId, ref: "Book", required: true }, // reference to the associated book
   imprint: { type: String, required: true },
   status: {
     type: String,
@@ -16,8 +16,9 @@ var BookInstanceSchema = new Schema({
 
 // Virtual for bookinstance's URL
 BookInstanceSchema.virtual("url").get(function () {
-  return "/catalog/bookinstance/" + this._id;
+  // We don't use an arrow function as we'll need the this object
+  return `/catalog/bookinstance/${this._id}`;
 });
 
-//Export model
+// Export model
 module.exports = mongoose.model("BookInstance", BookInstanceSchema);
