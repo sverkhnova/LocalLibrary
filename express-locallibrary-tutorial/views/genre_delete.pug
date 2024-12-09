@@ -1,0 +1,20 @@
+extends layout
+
+block content
+  h1= title
+
+  h2 Genre: #{genre.name}
+
+  if genre_books.length
+    p This genre has books associated with it. You must delete those books before you can delete this genre.
+    ul
+      each book in genre_books
+        li
+          a(href=book.url) #{book.title}
+  else
+    p Are you sure you want to delete this genre?
+
+    form(action=genre.url + '/delete' method='post')
+      input(type='hidden' name='genreid' value=genre._id)
+      button(type='submit' class='btn btn-danger') Delete
+      a(href='/catalog/genres' class='btn btn-secondary') Cancel
