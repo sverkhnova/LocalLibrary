@@ -124,10 +124,70 @@ exports.bookinstance_delete_post = asyncHandler(async (req, res, next) => {
 
 // Display BookInstance update form on GET.
 exports.bookinstance_update_get = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: BookInstance update GET");
+  // Получаем экземпляр книги и список всех книг
+  const [bookinstance, book_list] = await Promise.all([
+    BookInstance.findById(req.params.id).populate("book").exec(),
+    Book.find().sort({ title: 1 }).exec(),
+  ]);
+
+  if (bookinstance === null) {
+    const err = new Error("BookInstance not found");
+    err.status = 404;
+    return next(err);
+  }
+
+  res.render("bookinstance_form", {
+    title: "Update BookInstance",
+    bookinstance: bookinstance,
+    book_list: book_list, // Передаём список всех книг
+  });
 });
 
-// Handle bookinstance update on POST.
-exports.bookinstance_update_post = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: BookInstance update POST");
-});
+// Handle BookInstance update on POST.
+exports.bookinstance_update_post = [
+  // Валидация и очистка полей
+  body("book", "Book must be specified.")
+    .trim()
+    .isLength({ min: 1 })
+    .escape(),
+  body("imprint", "Imprint must be specified.")
+    .trim()
+    .isLength({ min: 1 })
+    .escape(),
+  body("status").escape(),
+  body("due_back", "Invalid date.")
+    .optional({ checkFalsy: true })
+    .isISO8601()
+    .toDate(),
+
+  // Обработка запроса после валидации
+  asyncHandler(async (req, res, next) => {
+    // Извлекаем ошибки валидации
+    const errors = validationResult(req);
+
+    // Создаём объект BookInstance с обновлёнными данными и старыми id
+    const bookinstance = new BookInstance({
+      book: req.body.book,
+      imprint: req.body.imprint,
+      status: req.body.status,
+      due_back: req.body.due_back,
+      _id: req.params.id, // Важно передать id, чтобы не создать новый экземпляр книги
+    });
+
+    if (!errors.isEmpty()) {
+      // Если есть ошибки, отображаем форму с сообщениями об ошибках
+      const allBooks = await Book.find().sort({ title: 1 }).exec();
+      res.render("bookinstance_form", {
+        title: "Update BookInstance",
+        bookinstance: bookinstance, // Передаём текущие значения
+        books: allBooks, // Список книг для выпадающего списка
+        errors: errors.array(), // Список ошибок
+      });
+      return;
+    } else {
+      // Данные из формы валидны, обновляем запись
+      await BookInstance.findByIdAndUpdate(req.params.id, bookinstance, {});
+      res.redirect(bookinstance.url);
+    }
+  }),
+];
