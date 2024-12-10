@@ -142,10 +142,68 @@ exports.author_delete_post = asyncHandler(async (req, res, next) => {
 
 // Display Author update form on GET.
 exports.author_update_get = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: Author update GET");
+  // Получаем автора по id
+  const author = await Author.findById(req.params.id).exec();
+
+  if (author === null) {
+    // Если автор не найден, отправляем 404 ошибку
+    const err = new Error("Author not found");
+    err.status = 404;
+    return next(err);
+  }
+
+  res.render("author_form", {
+    title: "Update Author",
+    author: author, // Передаём текущие данные автора в форму
+  });
 });
 
 // Handle Author update on POST.
-exports.author_update_post = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: Author update POST");
-});
+exports.author_update_post = [
+  // Валидация и очистка полей
+  body("first_name", "First name must be specified.")
+    .trim()
+    .isLength({ min: 1 })
+    .escape(),
+  body("family_name", "Family name must be specified.")
+    .trim()
+    .isLength({ min: 1 })
+    .escape(),
+  body("date_of_birth", "Invalid date of birth.")
+    .optional({ checkFalsy: true })
+    .isISO8601()
+    .toDate(),
+  body("date_of_death", "Invalid date of death.")
+    .optional({ checkFalsy: true })
+    .isISO8601()
+    .toDate(),
+
+  // Обработка запроса после валидации
+  asyncHandler(async (req, res, next) => {
+    // Извлекаем ошибки валидации
+    const errors = validationResult(req);
+
+    // Создаём объект Author с обновлёнными данными и старыми id
+    const author = new Author({
+      first_name: req.body.first_name,
+      family_name: req.body.family_name,
+      date_of_birth: req.body.date_of_birth,
+      date_of_death: req.body.date_of_death,
+      _id: req.params.id, // Важно передать id, чтобы не создать нового автора
+    });
+
+    if (!errors.isEmpty()) {
+      // Если есть ошибки, отображаем форму с сообщениями об ошибках
+      res.render("author_form", {
+        title: "Update Author",
+        author: author, // Передаём текущие значения
+        errors: errors.array(), // Передаём ошибки для отображения
+      });
+      return;
+    } else {
+      // Данные из формы валидны, обновляем запись
+      const updatedAuthor = await Author.findByIdAndUpdate(req.params.id, author, {});
+      res.redirect(updatedAuthor.url);
+    }
+  }),
+];
