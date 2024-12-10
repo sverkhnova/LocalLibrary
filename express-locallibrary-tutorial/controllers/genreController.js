@@ -116,10 +116,54 @@ exports.genre_delete_post = asyncHandler(async (req, res, next) => {
 
 // Display Genre update form on GET.
 exports.genre_update_get = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: Genre update GET");
+  // Получаем текущий жанр из базы данных
+  const genre = await Genre.findById(req.params.id).exec();
+
+  if (!genre) {
+    // Жанр не найден, перенаправляем на список жанров
+    const err = new Error("Genre not found");
+    err.status = 404;
+    return next(err);
+  }
+
+  res.render("genre_form", {
+    title: "Update Genre",
+    genre: genre, // Передаём текущий жанр в шаблон
+  });
 });
 
 // Handle Genre update on POST.
-exports.genre_update_post = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: Genre update POST");
-});
+exports.genre_update_post = [
+  // Валидация и очистка данных
+  body("name", "Genre name must contain at least 3 characters")
+    .trim()
+    .isLength({ min: 3 })
+    .escape(),
+
+  // Обработка запроса после валидации
+  asyncHandler(async (req, res, next) => {
+    // Извлекаем ошибки валидации
+    const errors = validationResult(req);
+
+    // Создаём новый объект Genre с обновлёнными данными
+    const genre = new Genre({
+      name: req.body.name,
+      _id: req.params.id, // Это важно для того, чтобы сохранить тот же id
+    });
+
+    if (!errors.isEmpty()) {
+      // Если есть ошибки — рендерим форму с ошибками
+      res.render("genre_form", {
+        title: "Update Genre",
+        genre: genre, // Передаём обновлённые данные жанра
+        errors: errors.array(), // Передаём ошибки в шаблон
+      });
+      return;
+    } else {
+      // Данные из формы валидны, обновляем запись
+      const updatedGenre = await Genre.findByIdAndUpdate(req.params.id, genre, {});
+      // Перенаправляем на страницу с деталями жанра
+      res.redirect(updatedGenre.url);
+    }
+  }),
+];
