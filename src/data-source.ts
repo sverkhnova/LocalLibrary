@@ -11,3 +11,5 @@ export const AppDataSource = new DataSource({
   logging: true, // Показывает запросы SQL в консоли
   entities: [__dirname + "/entities/*.ts"], // Место, где лежат твои сущности (модели)
 });
+
+console.log("AppDataSource config loaded!");
