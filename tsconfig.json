@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+      "target": "ES2020", // Указывает версию JS, в которую будет компилироваться TypeScript
+      "module": "CommonJS", // Указывает систему модулей (require/import)
+      "strict": true, // Включает строгую типизацию
+      "esModuleInterop": true, // Позволяет совместимость с import/export из CommonJS
+      "experimentalDecorators": true, // Включает декораторы (@Entity, @Column и т.д.)
+      "emitDecoratorMetadata": true, // Позволяет метаданным сохраняться для Reflect-metadata
+      "skipLibCheck": true, // Пропускает проверку типов в node_modules (ускоряет компиляцию)
+      "outDir": "./dist" // Скомпилированный JS будет складываться сюда
+    },
+    "include": ["src/**/*.ts"], // Включает все TypeScript файлы в папке src
+    "exclude": ["node_modules"] // Игнорирует папку node_modules
+  }
+  
