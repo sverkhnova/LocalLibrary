@@ -1,4 +1,4 @@
-import express, { Request, Response } from "express";
+import express from "express";
 import { AppDataSource } from "../src/data-source";
 import { User } from "../src/entities/User";
 import bcrypt from "bcrypt";
@@ -6,14 +6,15 @@ import bcrypt from "bcrypt";
 
 const router = express.Router();
 
-router.post("/register", async (req: Request, res: Response) => {
+router.post("/register", async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
     const userRepository = AppDataSource.getRepository(User);
     const existingUser = await userRepository.findOne({ where: { email } });
     if (existingUser) {
-      return res.status(400).json({ message: "Email уже используется" });
+      res.status(400).json({ message: "Email уже используется" });
+      return;
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
