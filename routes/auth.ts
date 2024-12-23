@@ -1,13 +1,20 @@
+import dotenv from "dotenv";
+dotenv.config();
 import express from "express";
 import { AppDataSource } from "../src/data-source";
 import { User } from "../src/entities/User";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-
+import { authenticateToken } from "../src/middlewares/authenticateToken";
 
 const router = express.Router();
 
-const JWT_SECRET = "your_secret_key";
+const JWT_SECRET = process.env.JWT_SECRET || "default_secret_key";
+
+router.get("/protected", authenticateToken, (req: any, res) => {
+  res.status(200).json({ message: `Welcome user with ${req.user.userId} ID` });
+  return;
+});
 
 router.post("/register", async (req, res) => {
   try {
@@ -66,5 +73,7 @@ router.post("/login", async (req, res) => {
       res.status(500).json({ message: "Ошибка на сервере" });
     }
   });
+  
+  console.log("JWT_SECRET:", process.env.JWT_SECRET);
 
 export default router;
