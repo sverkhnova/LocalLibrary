@@ -16,6 +16,28 @@ router.get("/protected", authenticateToken, (req: any, res) => {
   return;
 });
 
+router.get("/me", authenticateToken, async (req: any, res) => {
+  try {
+    const userId = req.user.userId; // Достаем userId из токена
+    const userRepository = AppDataSource.getRepository(User);
+
+    const user = await userRepository.findOne({
+      where: { id: userId },
+      select: ["id", "username", "email"], // Указываем, какие поля вернуть
+    });
+
+    if (!user) {
+      res.status(404).json({ message: "Пользователь не найден" });
+      return;
+    }
+
+    res.status(200).json(user);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Ошибка на сервере" });
+  }
+});
+
 router.post("/register", async (req, res) => {
   try {
     const { username, email, password } = req.body;
