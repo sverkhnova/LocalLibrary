@@ -6,6 +6,8 @@ import { User } from "../src/entities/User";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { authenticateToken } from "../src/middlewares/authenticateToken";
+import nodemailer from "nodemailer";
+import crypto from "crypto";
 
 const router = express.Router();
 
@@ -90,6 +92,55 @@ router.post("/login", async (req, res) => {
       });
   
       res.status(200).json({ message: "Авторизация успешна", token });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Ошибка на сервере" });
+    }
+  });
+
+  router.post("/forgot-password", async (req, res) => {
+    try {
+      const { email } = req.body;
+  
+      const userRepository = AppDataSource.getRepository(User);
+      const user = await userRepository.findOne({ where: { email } });
+  
+      if (!user) {
+        res.status(404).json({ message: "Пользователь не найден" });
+        return;
+      }
+  
+      // Генерируем токен сброса
+      const token = crypto.randomBytes(32).toString("hex");
+      const expires = new Date();
+      expires.setHours(expires.getHours() + 1); // Токен действителен 1 час
+  
+      user.resetPasswordToken = token;
+      user.resetPasswordExpires = expires;
+  
+      await userRepository.save(user);
+  
+      // Настраиваем Nodemailer
+      const transporter = nodemailer.createTransport({
+        service: "Gmail",
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS,
+        },
+      });
+  
+      // Ссылка для сброса
+      const resetUrl = `${req.protocol}://${req.get("host")}/reset-password/${token}`;
+  
+      // Отправляем письмо
+      await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: user.email,
+        subject: "Сброс пароля",
+        text: `Вы запросили сброс пароля. Перейдите по ссылке: ${resetUrl}`,
+      });
+  
+      res.status(200).json({ message: "Письмо для сброса пароля отправлено" });
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: "Ошибка на сервере" });
