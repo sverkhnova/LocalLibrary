@@ -14,7 +14,7 @@ export class User {
   @Column()
   password!: string; // Хешированный пароль
 
-  @Column({ nullable: true })
+  @Column({ type:"text", nullable: true })
   resetPasswordToken!: string | null;
   
   @Column({ type: "timestamp", nullable: true})
