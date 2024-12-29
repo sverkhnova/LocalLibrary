@@ -3,6 +3,7 @@ import { AppDataSource } from "./data-source";
 import express from "express";
 import authRoutes from "../routes/auth";
 import loginRoutes from "../routes/auth";
+import resetPasswordRouter from "../routes/reset-password";
 
 const app = express();
 
@@ -12,6 +13,7 @@ AppDataSource.initialize()
   })
   .catch((error) => console.error("❌ Ошибка подключения", error));
 
+  app.use("/auth", resetPasswordRouter);
   app.use(express.json());
   app.use("/auth", authRoutes);
   app.use("/login", loginRoutes);
