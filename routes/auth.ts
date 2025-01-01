@@ -7,7 +7,6 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { authenticateToken } from "../src/middlewares/authenticateToken";
 import nodemailer from "nodemailer";
-import crypto from "crypto";
 
 const router = express.Router();
 
@@ -111,7 +110,7 @@ router.post("/login", async (req, res) => {
       }
   
       // Генерируем токен сброса
-      const token = crypto.randomBytes(32).toString("hex");
+      const token = jwt.sign({ email: user.email }, process.env.JWT_SECRET!, { expiresIn: '1h' });
       const expires = new Date();
       expires.setHours(expires.getHours() + 1); // Токен действителен 1 час
   
@@ -288,5 +287,44 @@ router.post("/login", async (req, res) => {
   });
   
   console.log("JWT_SECRET:", process.env.JWT_SECRET);
+
+  router.post("/reset-password", async (req, res) => {
+    const { token, newPassword } = req.body;
+
+    if (!token || !newPassword) {
+        res.status(400).json({ message: "Токен и новый пароль обязательны" });
+        return;
+    }
+
+    try {
+        // Расшифровка JWT
+        const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { email: string };
+
+        // Находим пользователя по email
+        const user = await AppDataSource.getRepository(User).findOneBy({
+            email: decoded.email,
+        });
+
+        if (!user || user.resetPasswordToken !== token) {
+            res.status(400).json({ message: "Неверный или устаревший токен" });
+            return;
+        }
+
+        // Хэшируем новый пароль
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        user.password = hashedPassword;
+
+        // Очищаем токен сброса
+        user.resetPasswordToken = null;
+        user.resetPasswordExpires = null;
+
+        await AppDataSource.getRepository(User).save(user);
+
+        res.status(200).json({ message: "Пароль успешно обновлён" });
+    } catch (error) {
+        res.status(400).json({ message: "Ошибка проверки токена" });
+    }
+});
+
 
 export default router;
